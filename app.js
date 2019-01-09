@@ -1,4 +1,5 @@
 const express = require('express');
+const sequelize = require('./models').sequelize;
 
 const app = express();
 const host ='localhost';
@@ -11,6 +12,10 @@ app.get('/', (req, res) => {
     res.render('index')
 });
 
-app.listen(port, () => {
-    console.log(`app is running on: http://${host}:${port}/`);
+sequelize.sync().then(function() {
+    app.listen(port, () => {
+        console.log(`app is running on: http://${host}:${port}/`);
+    });
+}).catch(function(error) {
+    console.log(error);
 });
