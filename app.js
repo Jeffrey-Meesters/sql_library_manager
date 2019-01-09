@@ -8,9 +8,9 @@ const port = 3000;
 app.use('/static', express.static('public'));
 app.set('view engine', 'pug');
 
-app.get('/', (req, res) => {
-    res.render('index')
-});
+const routes = require('./routes');
+
+app.use(routes);
 
 sequelize.sync().then(function() {
     app.listen(port, () => {
