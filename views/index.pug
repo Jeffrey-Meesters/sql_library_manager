@@ -11,25 +11,11 @@ block content
                 th Genre
                 th Year
         tbody
-            tr
-                td
-                    a(href="book_detail.html") A Brief History of Time
-                td Stephen Hawking
-                td Non Fiction
-                td 1988
+            each book in books
+                tr
+                    td
+                        a(href="/book_detail/" + book.id)= book.title
+                    td= book.author
+                    td= book.genre
+                    td= book.year
 
-            tr
-                td 
-                    a(href="book_detail.html") Armada
-                
-                td Ernest Cline
-                td Science Fiction
-                td 2015
-
-            tr
-                td 
-                    a(href="book_detail.html") Emma
-                
-                td Jane Austen
-                td Classic
-                td 1815

@@ -1,7 +1,10 @@
 const express = require('express');
 const sequelize = require('./models').sequelize;
+const bodyParser = require('body-parser');
 
 const app = express();
+app.use(bodyParser.urlencoded({extended: false}));
+
 const host ='localhost';
 const port = 3000;
 
