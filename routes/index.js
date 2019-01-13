@@ -42,4 +42,13 @@ router.post('/book_detail/update/:id', (req, res) => {
     }).catch((error) => console.log('We got an error', error));
 });
 
+// Delete
+router.post('/books/:id/delete', (req, res) => {
+    Book.findById(req.params.id).then((book) => {
+        return book.destroy();
+    }).then((book) => {
+        res.redirect('/');
+    }).catch((error) => console.log('We got an error', error));
+});
+
 module.exports = router;
