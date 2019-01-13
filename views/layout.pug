@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 html
     head
-        title Library!
+        //- I knew how to pass an headTitle to the page and could show an page title
+        //- but also the head title should be able to change so I needed a solution to show correct/different head titles
+        //- and found it on StackOverflow
+        //- https://stackoverflow.com/questions/20915695/passing-jade-variables-from-content-to-page-title
+        block head
         link(rel='stylesheet', href='/static/stylesheets/style.css')
     body
+        block head
+            title= headTitle
         h1= title
         block content
