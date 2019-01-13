@@ -33,4 +33,13 @@ router.get('/book_detail/:id', (req, res) => {
     }).catch((error) => console.log('We got an error', error));
 });
 
+// Update
+router.post('/book_detail/update/:id', (req, res) => {
+    Book.findById(req.params.id).then((book) => {
+        return book.update(req.body);
+    }).then((book) => {
+        res.redirect('/book_detail/' + book.id);
+    }).catch((error) => console.log('We got an error', error));
+});
+
 module.exports = router;
