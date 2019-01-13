@@ -13,6 +13,7 @@ router.get('/books', (req, res, next) => {
         if (books) {
             res.render('index', {books: books, title: 'Books', headTitle: 'Books' });
         } else {
+            console.log(`/books: books not found` )
             res.render('book-not-found', { title: 'Book Not Found', headTitle: 'Book Not Found'});
         }
     }).catch((error) => { return next(500); });
@@ -29,9 +30,10 @@ router.post('/books/new', (req, res, next) => {
     // Sequelize create book with the data in req.body
     Book.create(req.body).then( (book)=> {
         if (book) {
-            // then redirect to spcific book route
-            res.redirect("/books/" + book.id)
+            // then redirect to books listing route
+            res.redirect("/books/")
         } else {
+            console.log(`book not found id: ${req.params.id}` )
             res.render('book-not-found', { title: 'Book Not Found', headTitle: 'Book Not Found'});
         }
     }).catch((error) => {
@@ -57,6 +59,7 @@ router.get('/books/:id', (req, res, next) => {
             // then render update book from
             res.render('update-book', { book: book, title: 'Update book', headTitle: book.title });
         } else {
+            console.log(`book not found id: ${req.params.id}` )
             res.render('book-not-found', { title: 'Book Not Found', headTitle: 'Book Not Found'});
         }
     }).catch((error) => { return next(500); });
@@ -71,11 +74,12 @@ router.post('/books/:id', (req, res, next) => {
             //  Sequelize update the book
             return book.update(req.body);
         } else {
+            console.log(`book not found id: ${req.params.id}` )
             res.render('book-not-found', { title: 'Book Not Found', headTitle: 'Book Not Found'});
         }
     }).then((book) => {
-        // Then redirect to /books/:id route
-        res.redirect('/books/' + book.id);
+        // Then redirect to books listing route
+        res.redirect('/books/');
     }).catch((error) => {
         if (error.name === "SequelizeValidationError") {
             Book.findByPk(req.params.id).then((book) => {
@@ -101,6 +105,7 @@ router.post('/books/:id/delete', (req, res, next) => {
             // Sequelize Destroy book
             return book.destroy();
         } else {
+            console.log(`book not found id: ${req.params.id}` )
             res.render('book-not-found', { title: 'Book Not Found', headTitle: 'Book Not Found'});
         }
     }).then((book) => {
@@ -112,7 +117,7 @@ router.post('/books/:id/delete', (req, res, next) => {
 // this middleware catches if non of the routes above are a\matched
 router.use((req, res, next) => {
     // Create a new error
-    const error = new Error("Book Not Found");
+    const error = new Error("Page Not Found");
     // give the error the 404 status
     error.status = 404;
     // call next with the error so the error handler will be triggered
