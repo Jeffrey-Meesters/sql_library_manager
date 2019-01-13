@@ -10,8 +10,12 @@ router.get('/', (req, res) => {
 // /books render books table
 router.get('/books', (req, res) => {
     Book.findAll({ order: [['createdAt', 'DESC']] }).then((books) => {
-        res.render('index', {books: books, title: 'books' });
-    })
+        if (books) {
+            res.render('index', {books: books, title: 'books' });
+        } else {
+            res.sendStatus(404);
+        }
+    }).catch((error) => res.sendStatus(500));
 });
 
 // /books/new render new book form
@@ -24,43 +28,75 @@ router.get('/books/new', (req, res) => {
 router.post('/books/new', (req, res) => {
     // Sequelize create book with the data in req.body
     Book.create(req.body).then( (book)=> {
-        // then redirect to spcific book route
-        res.redirect("/books/" + book.id)
-    }).catch((error) => console.log('We got an error', error));
+        if (book) {
+            // then redirect to spcific book route
+            res.redirect("/books/" + book.id)
+        } else {
+            res.sendStatus(404);
+        }
+    }).catch((error) => {
+        if (error.name === "SequelizeValidationError") {
+            // render error
+            res.render('new-book', { book: Book.build(), title: 'New book', error: error });
+        } else {
+            throw error;
+        }
+    }).catch((error) => res.sendStatus(500));
 });
 
 // /books/:id render book with requested id
 router.get('/books/:id', (req, res) => {
     // Sequelize find book by id
-    Book.findById(req.params.id).then((book) => {
-        // then render update book from
-        res.render('update-book', { book: book, title: 'Update book' });
-    }).catch((error) => console.log('We got an error', error));
+    Book.findByPk(req.params.id).then((book) => {
+        if (book) {    
+            // then render update book from
+            res.render('update-book', { book: book, title: 'Update book' });
+        } else {
+            res.sendStatus(404);
+        }
+    }).catch((error) => res.sendStatus(500));
 });
 
 // Update book
 // When a post methiod comes in on the /books/:id route
 router.post('/books/:id', (req, res) => {
     // Sequelize find book by id
-    Book.findById(req.params.id).then((book) => {
-        //  Sequelize update the book
-        return book.update(req.body);
+    Book.findByPk(req.params.id).then((book) => {
+        if (book) {
+            //  Sequelize update the book
+            return book.update(req.body);
+        } else {
+            res.sendStatus(404);
+        }
     }).then((book) => {
         // Then redirect to /books/:id route
         res.redirect('/books/' + book.id);
-    }).catch((error) => console.log('We got an error', error));
+    }).catch((error) => {
+        if (error.name === "SequelizeValidationError") {
+            Book.findByPk(req.params.id).then((book) => {
+                // render error
+                res.render('update-book', { book: book, title: 'Update book', error: error });
+            });
+        } else {
+            throw error;
+        }
+    }).catch((error) => res.sendStatus(500));
 });
 
 // Delete book
 router.post('/books/:id/delete', (req, res) => {
     //  Sequelize find book by id
     Book.findById(req.params.id).then((book) => {
-        // Sequelize Destroy book
-        return book.destroy();
+        if (book) {
+            // Sequelize Destroy book
+            return book.destroy();
+        } else {
+            res.sendStatus(404);
+        }
     }).then((book) => {
         // then redirect to /books route
         res.redirect('/books');
-    }).catch((error) => console.log('We got an error', error));
+    }).catch((error) => res.sendStatus(500));
 });
 
 module.exports = router;

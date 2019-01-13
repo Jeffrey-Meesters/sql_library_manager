@@ -1,6 +1,12 @@
 extends layout.pug
 block content
     form(action='/books/new', method='post')
+        if error
+            h2(class="error") Oooops!
+            ul(class="error")
+                li Author is required
+                li Name is required
+        
         p
             label(for="title") Title
             input(name="title", type="text", id="title")
