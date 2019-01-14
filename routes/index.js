@@ -94,8 +94,11 @@ router.post('/books/search', (req, res, next) => {
             ]
           }
     }).then((books) => {
-        console.log(books);
-        res.render('index', {books: books, title: 'Books', headTitle: 'Books', search: true });
+        if (books.length) {
+            res.render('index', {books: books, title: 'Books', headTitle: 'Books', search: true });
+        } else {
+            res.render('book-not-found', { title: 'Book Not Found', headTitle: 'Book Not Found', search: true});
+        }
     })
 })
 
