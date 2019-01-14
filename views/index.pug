@@ -1,19 +1,36 @@
 extends layout.pug
 block content
-    p
-        a.button(href="/books/new") Create New Book
-    table
-        thead
-            tr
-                th Title
-                th Author
-                th Genre
-                th Year
-        tbody
-            each book in books
+    div.nav
+        p
+            a.button(href="/books/new") Create New Book
+        form(action='/books/search', method='post')
+            label(for="search") Search
+            input(name="search", type="text", id="search")
+            input(type="submit", value="Search")
+    if books  
+        table
+            thead
                 tr
-                    td
-                        a(href="books/" + book.id)= book.title
-                    td= book.author
-                    td= book.genre
-                    td= book.year
+                    th Title
+                    th Author
+                    th Genre
+                    th Year      
+                tbody
+                    each book in books
+                        tr
+                            td
+                                a(href="/books/" + book.id)= book.title
+                            td= book.author
+                            td= book.genre
+                            td= book.year
+    else if noBooks
+        p No books found
+
+    if search
+        a.button(href="/books/page/1") Home
+
+    ul.pagination
+        - var n = 1;
+        while n < totalPages + 1
+            li.button
+                a(href=`/books/page/${n}`)= n++

@@ -1,20 +1,32 @@
 const express = require('express');
 const router = express.Router();
 const Book = require("../models").Book;
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 // Redirect root route to /books
 router.get('/', (req, res, next) => {
-    res.redirect('/books')
+    res.redirect('/books/page/1')
 });
 
 // /books render books table
-router.get('/books', (req, res, next) => {
-    Book.findAll({ order: [['createdAt', 'DESC']] }).then((books) => {
-        if (books) {
-            res.render('index', {books: books, title: 'Books', headTitle: 'Books' });
+router.get('/books/page/:page', (req, res, next) => {
+    let offset = 0;
+    const limit = 10;
+    const currentPage = Number(req.params.page);
+
+    if (req.params.page >= 1) {
+        offset = ((currentPage * limit) - 10);
+    }
+
+    Book.findAndCountAll({ limit: [[limit]], offset: [[offset]], order: [['createdAt', 'DESC']] }).then((books) => {
+        const numberOfPages = Math.ceil(books.count / limit);
+        
+        if (books.rows.length > 0 && currentPage !== 0 && currentPage <= numberOfPages ) {
+            res.render('index', {books: books.rows, title: 'Books', headTitle: 'Books', totalPages: numberOfPages });
         } else {
             console.log(`/books: books not found` )
-            res.render('book-not-found', { title: 'Book Not Found', headTitle: 'Book Not Found'});
+            res.render('index', {title: 'Books', headTitle: 'Books', totalPages: numberOfPages, noBooks: true });
         }
     }).catch((error) => { return next(500); });
 });
@@ -31,7 +43,7 @@ router.post('/books/new', (req, res, next) => {
     Book.create(req.body).then( (book)=> {
         if (book) {
             // then redirect to books listing route
-            res.redirect("/books/")
+            res.redirect("/books/page/1")
         } else {
             console.log(`book not found id: ${req.params.id}` )
             res.render('book-not-found', { title: 'Book Not Found', headTitle: 'Book Not Found'});
@@ -50,6 +62,42 @@ router.post('/books/new', (req, res, next) => {
         }
     }).catch((error) => { return next(500); });
 });
+
+router.post('/books/search', (req, res, next) => {
+    const searchTerm = `%${req.body.search}%`;
+
+    Book.findAll({
+        // like is case insensitive in sqlite by default:
+        // https://github.com/sequelize/sequelize/issues/4384
+        where: {
+            [Op.or]: [
+              {
+                title: {
+                  [Op.like]: searchTerm
+                }
+              },
+              {
+                author: {
+                  [Op.like]: searchTerm
+                }
+              },
+              {
+                genre: {
+                  [Op.like]: searchTerm
+                }
+              },
+              {
+                year: {
+                  [Op.like]: searchTerm
+                }
+              }
+            ]
+          }
+    }).then((books) => {
+        console.log(books);
+        res.render('index', {books: books, title: 'Books', headTitle: 'Books', search: true });
+    })
+})
 
 // /books/:id render book with requested id
 router.get('/books/:id', (req, res, next) => {
@@ -72,6 +120,7 @@ router.post('/books/:id', (req, res, next) => {
     Book.findByPk(req.params.id).then((book) => {
         if (book) {
             //  Sequelize update the book
+            console.log(1, req.body)
             return book.update(req.body);
         } else {
             console.log(`book not found id: ${req.params.id}` )
@@ -79,7 +128,7 @@ router.post('/books/:id', (req, res, next) => {
         }
     }).then((book) => {
         // Then redirect to books listing route
-        res.redirect('/books/');
+        res.redirect('/books/page/1');
     }).catch((error) => {
         if (error.name === "SequelizeValidationError") {
             Book.findByPk(req.params.id).then((book) => {
@@ -110,7 +159,7 @@ router.post('/books/:id/delete', (req, res, next) => {
         }
     }).then((book) => {
         // then redirect to /books route
-        res.redirect('/books');
+        res.redirect('/books/page/1');
     }).catch((error) => { return next(500); });
 });
 
