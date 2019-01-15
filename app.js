@@ -23,7 +23,7 @@ app.use(routes);
 sequelize.sync().then(function() {
     app.listen(port, () => {
         console.log(`app is running on: http://${host}:${port}/`);
-    });
+    })
 }).catch(function(error) {
-    console.log(error);
+    console.log('sequelize.sync error in app.js', error);
 });
