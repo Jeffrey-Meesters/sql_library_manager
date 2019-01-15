@@ -1,7 +1,7 @@
 const express = require('express');
 const sequelize = require('./models').sequelize;
 const bodyParser = require('body-parser');
-
+const open = require('open');
 const app = express();
 app.use(bodyParser.urlencoded({extended: false}));
 
@@ -23,6 +23,7 @@ app.use(routes);
 sequelize.sync().then(function() {
     app.listen(port, () => {
         console.log(`app is running on: http://${host}:${port}/`);
+        open(`http://${host}:${port}/`);
     })
 }).catch(function(error) {
     console.log('sequelize.sync error in app.js', error);
